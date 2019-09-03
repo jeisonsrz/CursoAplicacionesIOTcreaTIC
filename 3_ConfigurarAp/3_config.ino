@@ -10,52 +10,46 @@
 #include <DNSServer.h>
 #include <WiFiManager.h>
 
-const char* ssid = "AP *Eureka! Technology*";
-const char* password = "eureka123";
+const int PIN_AP=2;
 
-WiFiServer server(80);
+void configModeCallback(WiFiManager *myWifiManager)
+{
+    Serial.println("Modo de configuración....");
+    Serial.println(WiFi.softAPIP());
+    Serial.println(myWifiManager->getConfigPortalSSID());
+
+}
+
+void saveConfigCallback(){
+    Serial.println("Configuración Guardada");
+    Serial.println(WiFi.softAPIP());
+}
 
 void setup ()
 {
     Serial.begin(115200);
-    Serial.println("Configurando AP.....");
-    WiFi.softAP(ssid,password);
+    pinMode(PIN_AP,INPUT);
 
-    IPAddress myIP = WiFi.softAPIP();
-    Serial.print("http://");
-    Serial.println(myIP);
+    WiFiManager wifiManager; 
+    wifiManager.setAPCallback(configModeCallback());
+    wifiManager.setSaveConfigCallback(saveConfigCallback());
 
-    server.begin();
-    Serial.print("Servidor iniciado....");
-    //WiFi.disconnect(true);
+    wifiManager.autoConnect("Eureka! Technology RED Wifi","eureka123");
+
 }
 void loop(){
-    WiFiClient client = server.available();
-    if(!client){
-        return;
-    }
+  91200372731
 
-    Serial.print("Creando nuevo Cliente ....");
-    Serial.println(client.remoteIP());
+  WiFiManager wifiManager;
+  if(digitalRead(PIN_AP)== HIGH){
+      
+      if(!wifiManager.startConfigPortal("Eureka! Technology RED Wifi","eureka123")){
+          delay(2000);
+          ESP.restart();
+          delay(1000);
+      }
 
-    while (!client.available())
-    {
-        delay(1);
-    }
-    
-    client.println("HTTP/1.1 200 OK");
-    client.println("Content-Type: text/html");
-    client.println("");
-    client.println("<!DOCTYPE HTML>");
-    client.println("<html>");
-    client.println("<head> <meta charset=utf-8> </head>");
-    client.println("<body>");
-    client.println("<hl> Eueka! Technology Servidor AP *ESP32*</h1>");
-    client.println("</body>");
-    client.println("</html>");
-
-    client.flush();
-    client.stop();
+  }
 
 }
 
