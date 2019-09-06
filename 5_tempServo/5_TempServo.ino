@@ -12,25 +12,31 @@
 #endif
 #include <WiFiManager.h> 
 #include <HTTPClient.h>   
-#include <DHT11.h>     
-
+#include <DHT11.h>  
+#include <ESP32_Servo.h>
+    
 const int DHTPIN = 27;
+
 DHT11 dht11(DHTPIN);
 HTTPClient http;
+Servo servo;
+
+int angle = 0;
 void setup() {
     Serial.begin(115200);
     WiFiManager wifiManager;
-    wifiManager.autoConnect("EurekaESP32");
+    servo.attach(8);
+    wifiManager.autoConnect("GaboESP32");
     Serial.println("Estoy connectado a la red :D");
 }
 
 void loop() {  
     float temp,hum = 0.0;
     int err;
-    http.begin("https://aplicacionesiot-cursocreatic.firebaseio.com/data.json");
+    http.begin("https://iot-apps-course.firebaseio.com/data.json");
     http.addHeader("Content-Type","text/plain");
-    //if ((err = dht11.read(hum, temp))==0)
-    //{
+    if ((err = dht11.read(hum, temp))==0)
+    {
         Serial.print ("Temperatura: ");
         Serial.println (temp);
         Serial.print ("Humedad: ");
@@ -39,9 +45,22 @@ void loop() {
         int httpCode = http.POST(payload);
         Serial.println(httpCode);
         Serial.println(payload);
-        delay(3000);
-    //}
-   /* else{
+        moveServo(temp,hum);
+        delay(DHT11_RETRY_DELAY);
+    }
+    else{
         Serial.println("Error del sensor :'(");
-    }*/
+    }
+}
+
+void moveServo (float temp, float hum)
+{
+    if (temp>=28.0 && hum>= 10 )
+    {
+        servo.write(90);
+    }
+    else
+    {
+        servo.write(180);
+    }
 }
