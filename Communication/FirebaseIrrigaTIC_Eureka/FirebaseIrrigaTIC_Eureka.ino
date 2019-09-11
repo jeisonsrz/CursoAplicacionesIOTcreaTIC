@@ -185,10 +185,7 @@ String numCA= String(numCA1 + SerialData6 + "\"}");
             Serial.println(httpCode);
             Serial.println("Error en la petición");
         }
-        
-        http.end();
-    }
-    delay(2000);
+
 
 ///RELE LED
 
@@ -215,5 +212,12 @@ fireStatus = Firebase.getString("LED_STATUS");                     // get led st
     Serial.println("Wrong Credential! Please send ON/OFF");
 
   }
+        
+        //http.end();
+
+        
+    }
+    delay(2000);
+
     
 }
