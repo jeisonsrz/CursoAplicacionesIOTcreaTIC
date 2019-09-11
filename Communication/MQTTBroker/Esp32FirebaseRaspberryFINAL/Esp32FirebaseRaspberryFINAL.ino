@@ -1,10 +1,12 @@
 #include <DHT11.h>
 #include <WiFi.h>
-#include <HTTPClient.h>
 #include <PubSubClient.h>
+#include <HTTPClient.h>
 
-//conexiones wifi y mqtt
 
+//Temperaturaaa y humedad DHT11
+const int DHTPIN = 27;
+DHT11 dht11(DHTPIN);
 
 // Replace the next variables with your SSID/Password combination
 const char* ssid = "FAMILIARUIZ";
@@ -13,7 +15,6 @@ const char* password = "3215323276";
 // Add your MQTT Broker IP address, example:
 //const char* mqtt_server = "192.168.1.144";
 const char* mqtt_server = "192.168.0.29";
-
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -24,11 +25,9 @@ int value = 0;
 // LED Pin
 const int ledPin = 2;
 
-////////////////////////7
+//////////////////TEMPERATUR Y FLUJO FIREBASE
 
-//Temperaturaaa y humedad DHT11
-const int DHTPIN = 27;
-DHT11 dht11(DHTPIN);
+
 
 //Sensor de Flujo YF-S201
 const int sensorPin = 2;
@@ -81,27 +80,12 @@ void connectToNetwork()
         Serial.println("Tratando de establecer conexión WIFI...");
     }
     Serial.println("Conexión establecida :D");
-     Serial.println("IP address: ");
+    
+  Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 }
 
-
-void setup()
-{
-    Serial.begin(115200);
-    delay(1000);
-    //WiFi.begin(ssid,password) ;  Procedimiento de conexión
-    connectToNetwork();  
-     attachInterrupt(digitalPinToInterrupt(sensorPin), ISRCountPulse, RISING);
-   t0 = millis();
-
-   ///////////////MQTT SERVIDOR RASPBERRY
-   
-    client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
-  pinMode(ledPin, OUTPUT);
-}
-
+////////////////
 
 
 void callback(char* topic, byte* message, unsigned int length) {
@@ -151,13 +135,27 @@ void reconnect() {
     }
   }
 }
-//////////////////////////////
 
-void loop()
-{
-      
+void setup() {
+  Serial.begin(115200);
   
-    float temp,hum;
+    delay(1000);
+    //WiFi.begin(ssid,password) ;  Procedimiento de conexión
+    connectToNetwork();  
+     attachInterrupt(digitalPinToInterrupt(sensorPin), ISRCountPulse, RISING);
+   t0 = millis();
+   
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(callback);
+  pinMode(ledPin, OUTPUT);
+}
+
+
+
+
+void loop() {
+///////////////////////FIREBASEEE
+   float temp,hum;
     int err;
     
     if (WiFi.status() == WL_CONNECTED)
@@ -253,20 +251,19 @@ String numCA= String(numCA1 + SerialData6 + "\"}");
         }
         
         http.end();
-
-  
     }
     delay(2000);
 
+/////////////////////////
 
-//////////////MQTT RASPBERRY
 
+//////////MQTT RASPBERRY
 
   if (!client.connected()) {
     reconnect();
   }
   client.loop();
-  
+
   long now = millis();
   if (now - lastMsg > 5000) {
     lastMsg = now;
@@ -285,6 +282,4 @@ String numCA= String(numCA1 + SerialData6 + "\"}");
     Serial.println(humString);
     client.publish("esp32/temperature", humString);
   }
-
-//////////  
 }

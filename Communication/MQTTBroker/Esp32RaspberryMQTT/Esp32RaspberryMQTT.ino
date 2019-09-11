@@ -7,12 +7,12 @@ const int DHTPIN = 27;
 DHT11 dht11(DHTPIN);
 
 // Replace the next variables with your SSID/Password combination
-const char* ssid = "Emprendedores";
-const char* password = "AxtVvm13";
+const char* ssid = "FAMILIARUIZ";
+const char* password = "3215323276";
 
 // Add your MQTT Broker IP address, example:
 //const char* mqtt_server = "192.168.1.144";
-const char* mqtt_server = "192.168.1.138";
+const char* mqtt_server = "192.168.0.29";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
